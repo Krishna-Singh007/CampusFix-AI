@@ -1,0 +1,2637 @@
+// CampusFix AI - React UI Components
+const { useState, useEffect, useMemo, useCallback } = React;
+
+/**
+ * Toast Notification Provider / Component
+ */
+function ToastContainer({ toasts, removeToast }) {
+  if (!toasts.length) return null;
+  return (
+    <div className="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 max-w-md w-full pointer-events-none">
+      {toasts.map(toast => (
+        <div
+          key={toast.id}
+          className={`pointer-events-auto p-4 rounded-xl shadow-xl border flex items-start space-x-3 transition-all duration-300 transform translate-y-0 ${
+            toast.type === 'error'
+              ? 'bg-red-50 border-red-200 text-red-900'
+              : toast.type === 'warning'
+              ? 'bg-amber-50 border-amber-200 text-amber-900'
+              : toast.type === 'info'
+              ? 'bg-blue-50 border-blue-200 text-blue-900'
+              : 'bg-emerald-50 border-emerald-200 text-emerald-900'
+          }`}
+        >
+          <div className="flex-shrink-0 mt-0.5">
+            {toast.type === 'error' && <i className="fas fa-exclamation-circle text-red-500 text-lg"></i>}
+            {toast.type === 'warning' && <i className="fas fa-exclamation-triangle text-amber-500 text-lg"></i>}
+            {toast.type === 'info' && <i className="fas fa-info-circle text-blue-500 text-lg"></i>}
+            {toast.type === 'success' && <i className="fas fa-check-circle text-emerald-500 text-lg"></i>}
+          </div>
+          <div className="flex-1 text-sm">
+            {toast.title && <div className="font-semibold">{toast.title}</div>}
+            <div className="text-xs leading-relaxed opacity-90">{toast.message}</div>
+          </div>
+          <button
+            onClick={() => removeToast(toast.id)}
+            className="text-slate-400 hover:text-slate-700 text-xs p-1"
+          >
+            <i className="fas fa-times"></i>
+          </button>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * Navbar Component
+ */
+function Navbar({ activeTab, setActiveTab, metrics, onOpenTour, onOpenSettings }) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  return (
+    <header className="sticky top-0 z-40 glass-nav border-b border-slate-200/80 shadow-sm">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo & Brand */}
+          <div className="flex items-center space-x-3 cursor-pointer" onClick={() => setActiveTab('overview')}>
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-blue-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+              <i className="fas fa-tools text-lg"></i>
+            </div>
+            <div>
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-lg text-slate-900 tracking-tight">CampusFix</span>
+                <span className="bg-indigo-600 text-white text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded tracking-wider">AI</span>
+              </div>
+              <p className="text-[11px] text-slate-500 hidden sm:block">Campus Maintenance & AI Triage</p>
+            </div>
+          </div>
+
+          {/* Center Navigation Tabs */}
+          <nav className="hidden md:flex items-center space-x-1 bg-slate-100/80 p-1 rounded-xl border border-slate-200">
+            <button
+              onClick={() => setActiveTab('overview')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === 'overview'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <i className="fas fa-home mr-1.5"></i> Overview
+            </button>
+            <button
+              onClick={() => setActiveTab('report')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeTab === 'report'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <i className="fas fa-plus-circle mr-1.5"></i> Report an Issue
+            </button>
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`px-4 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center ${
+                activeTab === 'dashboard'
+                  ? 'bg-white text-indigo-700 shadow-sm'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/60'
+              }`}
+            >
+              <i className="fas fa-clipboard-list mr-1.5"></i> Maintenance Dashboard
+              {metrics.open + metrics.inProgress > 0 && (
+                <span className="ml-2 px-1.5 py-0.2 bg-amber-500 text-white text-[10px] font-bold rounded-full">
+                  {metrics.open + metrics.inProgress}
+                </span>
+              )}
+            </button>
+          </nav>
+
+          {/* Right Action Buttons */}
+          <div className="hidden sm:flex items-center space-x-2">
+            <button
+              onClick={onOpenTour}
+              className="inline-flex items-center px-3 py-1.5 rounded-lg text-xs font-semibold bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-sm hover:from-amber-600 hover:to-orange-600 transition"
+              title="Interactive Hackathon Demo Tour"
+            >
+              <i className="fas fa-rocket mr-1.5"></i> Hackathon Tour
+            </button>
+            <button
+              onClick={onOpenSettings}
+              className="p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition border border-transparent hover:border-slate-200"
+              title="Settings & AI Engine Mode"
+            >
+              <i className="fas fa-sliders-h text-sm"></i>
+            </button>
+            <button
+              onClick={() => setActiveTab('report')}
+              className="inline-flex items-center px-3.5 py-1.5 rounded-lg text-xs font-bold bg-indigo-600 text-white shadow hover:bg-indigo-700 transition"
+            >
+              <i className="fas fa-camera mr-1.5"></i> Report Now
+            </button>
+          </div>
+
+          {/* Mobile hamburger */}
+          <div className="flex md:hidden items-center space-x-2">
+            <button
+              onClick={onOpenTour}
+              className="px-2.5 py-1 bg-amber-500 text-white text-xs font-bold rounded-lg"
+            >
+              <i className="fas fa-rocket"></i>
+            </button>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="p-2 text-slate-600 hover:text-slate-900"
+            >
+              <i className={`fas ${mobileMenuOpen ? 'fa-times' : 'fa-bars'} text-lg`}></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile Drawer */}
+      {mobileMenuOpen && (
+        <div className="md:hidden border-t border-slate-200 bg-white px-4 pt-2 pb-4 space-y-1">
+          <button
+            onClick={() => { setActiveTab('overview'); setMobileMenuOpen(false); }}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold ${activeTab === 'overview' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'}`}
+          >
+            <i className="fas fa-home mr-2"></i> Overview
+          </button>
+          <button
+            onClick={() => { setActiveTab('report'); setMobileMenuOpen(false); }}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold ${activeTab === 'report' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'}`}
+          >
+            <i className="fas fa-plus-circle mr-2"></i> Report an Issue
+          </button>
+          <button
+            onClick={() => { setActiveTab('dashboard'); setMobileMenuOpen(false); }}
+            className={`w-full text-left px-3 py-2 rounded-lg text-sm font-semibold ${activeTab === 'dashboard' ? 'bg-indigo-50 text-indigo-700' : 'text-slate-700'}`}
+          >
+            <i className="fas fa-clipboard-list mr-2"></i> Maintenance Dashboard ({metrics.total})
+          </button>
+          <div className="pt-2 border-t border-slate-100 flex space-x-2">
+            <button
+              onClick={() => { onOpenTour(); setMobileMenuOpen(false); }}
+              className="flex-1 py-2 text-center text-xs font-bold bg-amber-500 text-white rounded-lg"
+            >
+              <i className="fas fa-rocket mr-1"></i> Demo Tour
+            </button>
+            <button
+              onClick={() => { onOpenSettings(); setMobileMenuOpen(false); }}
+              className="px-4 py-2 text-xs font-bold bg-slate-100 text-slate-700 rounded-lg"
+            >
+              <i className="fas fa-sliders-h mr-1"></i> Settings
+            </button>
+          </div>
+        </div>
+      )}
+    </header>
+  );
+}
+
+/**
+ * Overview / Home View
+ */
+function OverviewView({ setActiveTab, metrics, onOpenTour, onTriggerDemoPreset }) {
+  const samplePresets = window.CAMPUS_FIX_SAMPLE_DATA?.demoPresets || [];
+
+  return (
+    <div className="space-y-10 pb-16">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white p-8 sm:p-12 shadow-2xl">
+        <div className="absolute inset-0 opacity-10 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div className="relative z-10 max-w-3xl">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/20 border border-indigo-400/30 text-indigo-300 text-xs font-semibold mb-6">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <span>Intelligent Campus Maintenance & Facilities Hub</span>
+          </div>
+          <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight mb-4">
+            Faster fixes. Safer campus. <br />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-teal-300">
+              Powered by Real-Time AI Triage.
+            </span>
+          </h1>
+          <p className="text-base sm:text-lg text-slate-300 leading-relaxed mb-8">
+            College campus mein leaking tap, exposed wires ya blocked wheelchair ramp ko report karna ab effortless hai.
+            AI category aur priority suggest karta hai, duplicate complaints ko identify karta hai, aur maintenance team ko fast track resolution deta hai.
+          </p>
+
+          <div className="flex flex-wrap gap-3">
+            <button
+              onClick={() => setActiveTab('report')}
+              className="px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold shadow-lg shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center space-x-2"
+            >
+              <i className="fas fa-camera text-base"></i>
+              <span>Report an Issue Now</span>
+            </button>
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className="px-6 py-3 rounded-xl bg-white/10 hover:bg-white/20 text-white text-sm font-semibold border border-white/20 backdrop-blur-md transition flex items-center space-x-2"
+            >
+              <i className="fas fa-columns text-base"></i>
+              <span>Open Maintenance Dashboard</span>
+            </button>
+            <button
+              onClick={onOpenTour}
+              className="px-5 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-sm font-bold shadow-md transition flex items-center space-x-2"
+            >
+              <i className="fas fa-play text-xs"></i>
+              <span>Hackathon Judge Demo</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Floating Quick Stats Card */}
+        <div className="mt-10 pt-8 border-t border-white/10 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-sm">
+            <div className="text-2xl font-black text-white">{metrics.total}</div>
+            <div className="text-xs text-slate-400 font-medium">Total Campus Issues</div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-sm">
+            <div className="text-2xl font-black text-amber-400">{metrics.open}</div>
+            <div className="text-xs text-slate-400 font-medium">Pending Triage</div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-sm">
+            <div className="text-2xl font-black text-blue-400">{metrics.inProgress}</div>
+            <div className="text-xs text-slate-400 font-medium">Under Repair</div>
+          </div>
+          <div className="bg-white/5 border border-white/10 rounded-xl p-3.5 backdrop-blur-sm">
+            <div className="text-2xl font-black text-emerald-400">{metrics.resolved}</div>
+            <div className="text-xs text-slate-400 font-medium">Resolved & Verified</div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1-Click Interactive Hackathon Scenarios */}
+      <section className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-bold text-slate-900 flex items-center">
+              <i className="fas fa-magic text-amber-500 mr-2"></i>
+              Instant Hackathon Test Scenarios (1-Click Demo)
+            </h2>
+            <p className="text-xs text-slate-500">
+              Click any scenario below to immediately test the AI triage, hazard prioritization, and duplicate detection!
+            </p>
+          </div>
+          <span className="mt-2 sm:mt-0 text-[11px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full">
+            Ready for Live Presentation
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          {samplePresets.map(preset => (
+            <div
+              key={preset.id}
+              onClick={() => onTriggerDemoPreset(preset)}
+              className="group cursor-pointer rounded-xl border border-slate-200 hover:border-indigo-400 bg-slate-50/70 hover:bg-indigo-50/50 p-3.5 transition-all duration-200 flex flex-col justify-between"
+            >
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-xs font-bold text-slate-800 group-hover:text-indigo-700">
+                    {preset.label}
+                  </span>
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700 shadow-2xs">
+                    {preset.badge}
+                  </span>
+                </div>
+                <p className="text-xs text-slate-600 line-clamp-2 mb-2 italic">
+                  "{preset.description}"
+                </p>
+              </div>
+              <div className="text-[11px] font-semibold text-indigo-600 flex items-center group-hover:translate-x-1 transition-transform">
+                <span>Run this test</span>
+                <i className="fas fa-arrow-right ml-1 text-[10px]"></i>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* The 3-Step Solution Flow */}
+      <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+          <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl font-bold mb-4">
+            1
+          </div>
+          <h3 className="font-bold text-slate-900 text-base mb-2">Photo & Location Capture</h3>
+          <p className="text-xs text-slate-600 leading-relaxed mb-4">
+            Students take or pick a photo of the defect, choose the building/room, and submit a brief description. No complex account logins or endless WhatsApp chains.
+          </p>
+          <ul className="text-xs text-slate-500 space-y-1.5 border-t border-slate-100 pt-3">
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> Instant photo preview & replace</li>
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> Specific room & landmark tags</li>
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> Hinglish & English natural language</li>
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+          <div className="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold mb-4">
+            2
+          </div>
+          <h3 className="font-bold text-slate-900 text-base mb-2">AI Triage & Duplicate Scan</h3>
+          <p className="text-xs text-slate-600 leading-relaxed mb-4">
+            AI instantly scans hazard terms, recommends Category & Priority with transparent rationale, and detects identical reports to stop spam and duplicate tickets.
+          </p>
+          <ul className="text-xs text-slate-500 space-y-1.5 border-t border-slate-100 pt-3">
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> Hazard escalation (Urgent for sparks)</li>
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> Transparent plain-language reasoning</li>
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> Upvote option on existing duplicates</li>
+          </ul>
+        </div>
+
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm relative overflow-hidden">
+          <div className="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold mb-4">
+            3
+          </div>
+          <h3 className="font-bold text-slate-900 text-base mb-2">Maintenance Dispatch & Close</h3>
+          <p className="text-xs text-slate-600 leading-relaxed mb-4">
+            Facilities staff triage from a unified Kanban/list dashboard: assign technicians, adjust triage, progress status from Open ➔ In Progress ➔ Resolved with audit notes.
+          </p>
+          <ul className="text-xs text-slate-500 space-y-1.5 border-t border-slate-100 pt-3">
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> SLA & urgency-based prioritization</li>
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> One-click status stepper progression</li>
+            <li className="flex items-center"><i className="fas fa-check text-emerald-500 mr-2"></i> Real-time resolution log & audit trail</li>
+          </ul>
+        </div>
+      </section>
+
+      {/* Problem Comparison Table */}
+      <section className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+        <div className="p-6 bg-slate-50/70 border-b border-slate-200">
+          <h3 className="text-base font-bold text-slate-900">Why CampusFix AI? (Real Campus Impact)</h3>
+          <p className="text-xs text-slate-500">Comparing traditional manual complaint handling with CampusFix AI workflow</p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-100/80 text-slate-700 font-semibold uppercase tracking-wider text-[11px]">
+              <tr>
+                <th className="py-3 px-4">Problem Area</th>
+                <th className="py-3 px-4 text-red-700 bg-red-50/50">Traditional Campus Method</th>
+                <th className="py-3 px-4 text-emerald-700 bg-emerald-50/50">CampusFix AI Solution</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-200 text-slate-600">
+              <tr>
+                <td className="py-3 px-4 font-semibold text-slate-800">Duplicate Complaints</td>
+                <td className="py-3 px-4 bg-red-50/20">10 different students report the same broken tap; staff wastes time reading redundant tickets.</td>
+                <td className="py-3 px-4 bg-emerald-50/20 font-medium text-emerald-950">AI auto-detects matching location + keywords, prompting students to +1 Upvote the existing ticket instead.</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-slate-800">Prioritization of Danger</td>
+                <td className="py-3 px-4 bg-red-50/20">Urgent exposed wire gets lost in queue behind 15 minor broken chair tickets.</td>
+                <td className="py-3 px-4 bg-emerald-50/20 font-medium text-emerald-950">Hazard scoring immediately flags electrical sparks & blocked accessibility ramps as Urgent/High with &lt;2hr SLA.</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-slate-800">Categorization Accuracy</td>
+                <td className="py-3 px-4 bg-red-50/20">Misrouted to wrong department (e.g. Electrician sent to fix plumbing water pump).</td>
+                <td className="py-3 px-4 bg-emerald-50/20 font-medium text-emerald-950">Dual Heuristic/Gemini classification automatically routes to Electrical, Plumbing, Cleaning, etc.</td>
+              </tr>
+              <tr>
+                <td className="py-3 px-4 font-semibold text-slate-800">Status Visibility</td>
+                <td className="py-3 px-4 bg-red-50/20">Students have no idea if anyone received their report or when it will be fixed.</td>
+                <td className="py-3 px-4 bg-emerald-50/20 font-medium text-emerald-950">Transparent lifecycle: Open ➔ In Progress (assigned technician) ➔ Resolved with resolution notes.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+/**
+ * Report Form View (Student Flow)
+ */
+function ReportFormView({ setActiveTab, onReportCreated, addToast, presetToLoad, clearPresetToLoad }) {
+  const sampleData = window.CAMPUS_FIX_SAMPLE_DATA;
+  const buildings = sampleData?.buildings || [];
+  const categories = sampleData?.categories || [];
+  const presetPhotos = sampleData?.presetPhotos || [];
+  const demoPresets = sampleData?.demoPresets || [];
+
+  // Form State
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const [buildingId, setBuildingId] = useState('block-b');
+  const [room, setRoom] = useState('');
+  const [reportedBy, setReportedBy] = useState('');
+  const [studentContact, setStudentContact] = useState('');
+
+  // Photo State
+  const [photoUrl, setPhotoUrl] = useState('');
+  const [photoSelectedObj, setPhotoSelectedObj] = useState(null);
+  const [customPhotoName, setCustomPhotoName] = useState('');
+
+  // AI & Duplicate State
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [aiTriage, setAiTriage] = useState(null);
+  const [duplicateResult, setDuplicateResult] = useState(null);
+
+  // Editable overrides by student
+  const [overrideCategory, setOverrideCategory] = useState('');
+  const [overridePriority, setOverridePriority] = useState('');
+
+  // Handle Preset Injection
+  useEffect(() => {
+    if (presetToLoad) {
+      setTitle(presetToLoad.label.replace(/^[^\s]+\s*/, ''));
+      setDescription(presetToLoad.description || '');
+      setBuildingId(presetToLoad.building || 'block-b');
+      setRoom(presetToLoad.room || '');
+
+      const photo = presetPhotos.find(p => p.id === presetToLoad.photoId);
+      if (photo) {
+        setPhotoUrl(photo.url);
+        setPhotoSelectedObj(photo);
+        setCustomPhotoName(photo.title);
+      }
+
+      setReportedBy('Test Student (Hackathon Demo)');
+      setStudentContact('demo.student@campus.edu');
+
+      // Clear the trigger
+      clearPresetToLoad();
+
+      // Automatically trigger AI analysis for instant demo feedback
+      runAnalysis({
+        title: presetToLoad.label,
+        description: presetToLoad.description,
+        buildingId: presetToLoad.building,
+        room: presetToLoad.room,
+        photoSelected: photo
+      });
+    }
+  }, [presetToLoad]);
+
+  // Handle Custom File Upload
+  const handleFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      addToast({ type: 'error', title: 'Invalid File', message: 'Please select an image file (PNG, JPG, WebP).' });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      setPhotoUrl(event.target.result);
+      setCustomPhotoName(file.name);
+      setPhotoSelectedObj({ title: file.name, url: event.target.result, category: null });
+      addToast({ type: 'success', title: 'Photo Uploaded', message: `Attached: ${file.name}` });
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Run AI Triage & Duplicate Scan
+  const runAnalysis = async (customParams = null) => {
+    const descToUse = customParams?.description !== undefined ? customParams.description : description;
+    const titleToUse = customParams?.title !== undefined ? customParams.title : title;
+    const bldgToUse = customParams?.buildingId !== undefined ? customParams.buildingId : buildingId;
+    const roomToUse = customParams?.room !== undefined ? customParams.room : room;
+    const photoToUse = customParams?.photoSelected !== undefined ? customParams.photoSelected : photoSelectedObj;
+
+    if (!descToUse.trim() && !titleToUse.trim()) {
+      addToast({ type: 'warning', title: 'Description Required', message: 'Please write a brief description of the issue first.' });
+      return;
+    }
+
+    setIsAnalyzing(true);
+
+    try {
+      const settings = window.CampusFixStorage.getSettings();
+      let triageResult = null;
+
+      // Check if Gemini API is enabled with key
+      if (settings.useGeminiAPI && settings.geminiApiKey) {
+        const bldgObj = buildings.find(b => b.id === bldgToUse);
+        try {
+          triageResult = await window.CampusFixAI.triageWithGeminiAPI({
+            title: titleToUse,
+            description: descToUse,
+            buildingName: bldgObj ? bldgObj.name : bldgToUse,
+            room: roomToUse,
+            photoBase64: photoUrl,
+            apiKey: settings.geminiApiKey
+          });
+          addToast({ type: 'success', title: 'Gemini AI Vision Triage', message: 'Analyzed using live Google Gemini API!' });
+        } catch (apiErr) {
+          console.warn('Gemini API call failed, falling back to local heuristic engine:', apiErr);
+          addToast({ type: 'warning', title: 'Gemini API Fallback', message: `API error (${apiErr.message}). Switched to local heuristic engine.` });
+          triageResult = window.CampusFixAI.triageIssueLocally({
+            title: titleToUse,
+            description: descToUse,
+            buildingId: bldgToUse,
+            room: roomToUse,
+            photoSelected: photoToUse
+          });
+        }
+      } else {
+        // Smart Local Heuristic Engine (instant & offline demo ready)
+        // Add small realistic processing delay for smooth UI feedback (350ms)
+        await new Promise(r => setTimeout(r, 350));
+        triageResult = window.CampusFixAI.triageIssueLocally({
+          title: titleToUse,
+          description: descToUse,
+          buildingId: bldgToUse,
+          room: roomToUse,
+          photoSelected: photoToUse
+        });
+      }
+
+      setAiTriage(triageResult);
+      setOverrideCategory(triageResult.category);
+      setOverridePriority(triageResult.priority);
+
+      // Duplicate Detection Scan against active reports in storage
+      const existingReports = window.CampusFixStorage.getReports();
+      const dup = window.CampusFixAI.detectDuplicates(
+        {
+          title: titleToUse,
+          description: descToUse,
+          buildingId: bldgToUse,
+          room: roomToUse,
+          category: triageResult.category
+        },
+        existingReports
+      );
+
+      setDuplicateResult(dup);
+
+      if (dup.isDuplicate) {
+        addToast({
+          type: 'warning',
+          title: 'Duplicate Detected',
+          message: `Similar issue found at ${dup.matchedReport.buildingName} (${dup.confidence}% match).`
+        });
+      } else {
+        addToast({
+          type: 'info',
+          title: 'AI Triage Complete',
+          message: `Categorized as ${triageResult.category} (${triageResult.priority} priority).`
+        });
+      }
+    } catch (err) {
+      console.error('Triage error:', err);
+      addToast({ type: 'error', title: 'Triage Error', message: err.message });
+    } finally {
+      setIsAnalyzing(false);
+    }
+  };
+
+  // Upvote Existing Duplicate Issue Handler
+  const handleUpvoteExisting = () => {
+    if (!duplicateResult?.matchedReport) return;
+    const matched = duplicateResult.matchedReport;
+    window.CampusFixStorage.upvoteReport(matched.id, reportedBy || 'Campus Student');
+    addToast({
+      type: 'success',
+      title: 'Report Upvoted!',
+      message: `Added your vote to Report #${matched.id}. Maintenance team notified of increased urgency.`
+    });
+    setActiveTab('dashboard');
+  };
+
+  // Submit Final Report
+  const handleSubmitReport = (e) => {
+    e.preventDefault();
+
+    if (!description.trim()) {
+      addToast({ type: 'error', title: 'Missing Information', message: 'Please describe the maintenance issue.' });
+      return;
+    }
+
+    const bldgObj = buildings.find(b => b.id === buildingId);
+
+    // If AI hasn't been run yet, run local triage synchronously
+    let finalTriage = aiTriage;
+    if (!finalTriage) {
+      finalTriage = window.CampusFixAI.triageIssueLocally({
+        title,
+        description,
+        buildingId,
+        room,
+        photoSelected: photoSelectedObj
+      });
+    }
+
+    const reportData = {
+      title: title.trim() || description.slice(0, 60) + (description.length > 60 ? '...' : ''),
+      description: description.trim(),
+      buildingId: buildingId,
+      buildingName: bldgObj ? bldgObj.name : 'Campus General',
+      room: room.trim() || 'General Area',
+      category: overrideCategory || finalTriage.category,
+      priority: overridePriority || finalTriage.priority,
+      reportedBy: reportedBy.trim() || 'Student (Anonymous)',
+      studentContact: studentContact.trim(),
+      photoUrl: photoUrl || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=800&q=80',
+      linkedDuplicateId: duplicateResult?.isDuplicate ? duplicateResult.matchedReport.id : null,
+      aiTriage: {
+        ...finalTriage,
+        category: overrideCategory || finalTriage.category,
+        priority: overridePriority || finalTriage.priority
+      }
+    };
+
+    const created = window.CampusFixStorage.createReport(reportData);
+
+    addToast({
+      type: 'success',
+      title: 'Report Submitted Successfully!',
+      message: `Ticket #${created.id} generated and dispatched to the Maintenance Dashboard.`
+    });
+
+    onReportCreated(created);
+    setActiveTab('dashboard');
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6 pb-20">
+      {/* Title Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-200">
+        <div>
+          <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight flex items-center">
+            <span className="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center mr-2.5 text-sm">
+              <i className="fas fa-camera"></i>
+            </span>
+            Report a Maintenance Problem
+          </h1>
+          <p className="text-xs text-slate-500 mt-1">
+            Photo upload karein, location select karein aur description likhein. AI triage category aur priority suggest karega.
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setActiveTab('dashboard')}
+          className="mt-3 sm:mt-0 text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center"
+        >
+          <i className="fas fa-arrow-left mr-1.5"></i> Back to Dashboard
+        </button>
+      </div>
+
+      {/* 1-Click Quick Fill Chips for Demo Testing */}
+      <div className="bg-gradient-to-r from-indigo-50/80 via-blue-50/50 to-slate-50 p-4 rounded-2xl border border-indigo-100 shadow-2xs">
+        <div className="flex items-center justify-between mb-2">
+          <span className="text-xs font-bold text-indigo-900 flex items-center">
+            <i className="fas fa-bolt text-amber-500 mr-1.5"></i> Quick Fill Hackathon Scenarios
+          </span>
+          <span className="text-[11px] text-indigo-600 font-medium">Click to populate form instantly</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {demoPresets.map(preset => (
+            <button
+              key={preset.id}
+              type="button"
+              onClick={() => {
+                setTitle(preset.label.replace(/^[^\s]+\s*/, ''));
+                setDescription(preset.description);
+                setBuildingId(preset.building);
+                setRoom(preset.room);
+                const photo = presetPhotos.find(p => p.id === preset.photoId);
+                if (photo) {
+                  setPhotoUrl(photo.url);
+                  setPhotoSelectedObj(photo);
+                  setCustomPhotoName(photo.title);
+                }
+                setReportedBy('Hackathon Evaluator');
+                runAnalysis({
+                  title: preset.label,
+                  description: preset.description,
+                  buildingId: preset.building,
+                  room: preset.room,
+                  photoSelected: photo
+                });
+              }}
+              className="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white hover:bg-indigo-600 hover:text-white border border-slate-200 text-slate-700 shadow-2xs transition-all flex items-center space-x-1.5"
+            >
+              <span>{preset.label}</span>
+              <span className="text-[10px] opacity-75 font-normal">({preset.badge})</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Main Report Form */}
+      <form onSubmit={handleSubmitReport} className="space-y-6">
+        <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm space-y-6">
+          {/* Section 1: Photo Upload & Presets */}
+          <div>
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">
+              1. Issue Photo <span className="text-indigo-600 font-normal lowercase">(upload photo or pick campus sample)</span>
+            </label>
+
+            {/* Photo Preview Container */}
+            {photoUrl ? (
+              <div className="relative rounded-2xl overflow-hidden border-2 border-indigo-200 bg-slate-900 group">
+                <img
+                  src={photoUrl}
+                  alt="Issue preview"
+                  className="w-full h-56 sm:h-64 object-cover object-center group-hover:opacity-90 transition"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent flex items-end justify-between p-4">
+                  <div>
+                    <span className="bg-indigo-600 text-white text-[11px] font-bold px-2 py-0.5 rounded shadow">
+                      {customPhotoName || 'Attached Photo'}
+                    </span>
+                    <p className="text-[11px] text-slate-300 mt-1">Photo ready for AI analysis</p>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setPhotoUrl('');
+                        setPhotoSelectedObj(null);
+                        setCustomPhotoName('');
+                      }}
+                      className="px-3 py-1.5 rounded-lg bg-red-600/90 hover:bg-red-700 text-white text-xs font-semibold shadow transition"
+                    >
+                      <i className="fas fa-trash-alt mr-1"></i> Remove
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="border-2 border-dashed border-slate-300 hover:border-indigo-400 rounded-2xl p-6 text-center bg-slate-50/50 hover:bg-indigo-50/30 transition">
+                <div className="w-12 h-12 rounded-full bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 text-lg">
+                  <i className="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div className="text-xs text-slate-600 font-medium">
+                  <label htmlFor="file-upload" className="cursor-pointer font-bold text-indigo-600 hover:text-indigo-700">
+                    Click to upload photo
+                  </label>{' '}
+                  or drag & drop
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1">PNG, JPG, WebP up to 10MB</p>
+                <input
+                  id="file-upload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="sr-only"
+                />
+              </div>
+            )}
+
+            {/* Curated Sample Photos Selector */}
+            <div className="mt-3">
+              <span className="text-[11px] font-semibold text-slate-500 block mb-2">
+                Or choose a realistic campus sample photo:
+              </span>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                {presetPhotos.map(p => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => {
+                      setPhotoUrl(p.url);
+                      setPhotoSelectedObj(p);
+                      setCustomPhotoName(p.title);
+                    }}
+                    className={`relative rounded-xl overflow-hidden border-2 text-left transition group h-16 ${
+                      photoUrl === p.url ? 'border-indigo-600 ring-2 ring-indigo-200' : 'border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <img src={p.url} alt={p.title} className="w-full h-full object-cover group-hover:scale-105 transition" />
+                    <div className="absolute inset-0 bg-slate-900/40 flex items-end p-1">
+                      <span className="text-[9px] font-bold text-white truncate drop-shadow">
+                        {p.title.split('/')[0]}
+                      </span>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Section 2: Location Information */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                2. Campus Building / Area <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={buildingId}
+                onChange={e => setBuildingId(e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+                required
+              >
+                {buildings.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Room No. or Landmark <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={room}
+                onChange={e => setRoom(e.target.value)}
+                placeholder="e.g. Ground Floor Washroom, Lab 204, Staircase B"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Section 3: Description & Title */}
+          <div className="space-y-4 pt-4 border-t border-slate-100">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Issue Title / Summary <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={title}
+                onChange={e => setTitle(e.target.value)}
+                placeholder="e.g. Washroom tap se lagataar paani leak ho raha hai"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="block text-xs font-bold uppercase tracking-wider text-slate-700">
+                  3. Description <span className="text-red-500">*</span>
+                </label>
+                <span className="text-[11px] text-slate-400">{description.length} characters</span>
+              </div>
+              <textarea
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                rows={3}
+                placeholder="Problem kya hai? Jaise: Tap tight band karne par bhi boondein gir rahi hain, floor par paani jama ho gaya hai..."
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                required
+              />
+              <p className="text-[11px] text-slate-500 mt-1">
+                <i className="fas fa-lightbulb text-amber-500 mr-1"></i> Tip: Mention hazards like sparks, leaks, blocked pathways, or odor to help AI prioritize.
+              </p>
+            </div>
+          </div>
+
+          {/* Section 4: Reporter Details (Optional) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Your Name <span className="text-slate-400 font-normal">(Optional)</span>
+              </label>
+              <input
+                type="text"
+                value={reportedBy}
+                onChange={e => setReportedBy(e.target.value)}
+                placeholder="e.g. Aryan Sharma (3rd Year CS)"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                Campus Email or Phone <span className="text-slate-400 font-normal">(Optional for updates)</span>
+              </label>
+              <input
+                type="text"
+                value={studentContact}
+                onChange={e => setStudentContact(e.target.value)}
+                placeholder="e.g. aryan@campus.edu"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+              />
+            </div>
+          </div>
+
+          {/* Trigger Live AI Analysis Button */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div>
+              <div className="text-xs font-bold text-slate-900">Want to preview AI Triage before submitting?</div>
+              <div className="text-[11px] text-slate-500">Run AI analysis to check suggested category, priority & duplicate reports.</div>
+            </div>
+            <button
+              type="button"
+              disabled={isAnalyzing || (!description.trim() && !title.trim())}
+              onClick={() => runAnalysis()}
+              className="w-full sm:w-auto px-4 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs font-bold shadow-2xs transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+            >
+              {isAnalyzing ? (
+                <>
+                  <i className="fas fa-spinner fa-spin"></i>
+                  <span>Analyzing Issue...</span>
+                </>
+              ) : (
+                <>
+                  <i className="fas fa-robot text-indigo-600"></i>
+                  <span>Run AI Triage & Duplicate Scan</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* AI TRIAGE CARD (Displayed when analyzed) */}
+        {aiTriage && (
+          <div className="bg-gradient-to-br from-indigo-50/90 via-white to-blue-50/80 rounded-2xl border-2 border-indigo-200 p-6 shadow-md space-y-4 animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-indigo-100">
+              <div className="flex items-center space-x-2">
+                <span className="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs">
+                  <i className="fas fa-brain"></i>
+                </span>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900">AI Triage Recommendation</h3>
+                  <p className="text-[11px] text-indigo-700 font-medium">{aiTriage.engine}</p>
+                </div>
+              </div>
+              <span className="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200">
+                {aiTriage.confidence}% Confidence
+              </span>
+            </div>
+
+            {/* Category & Priority Display */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-white p-4 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                  Suggested Category
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border cat-badge-${overrideCategory || aiTriage.category}`}>
+                    <i className="fas fa-tag mr-1.5"></i>
+                    {overrideCategory || aiTriage.category}
+                  </span>
+                  {/* Category override select */}
+                  <select
+                    value={overrideCategory || aiTriage.category}
+                    onChange={e => setOverrideCategory(e.target.value)}
+                    className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 focus:outline-none"
+                    title="Change category if needed"
+                  >
+                    {categories.map(c => (
+                      <option key={c.id} value={c.id}>{c.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-xl border border-indigo-100 shadow-2xs">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 block mb-1">
+                  Suggested Priority
+                </span>
+                <div className="flex items-center justify-between">
+                  <span className={`inline-flex items-center px-3 py-1 rounded-lg text-xs font-bold border pri-badge-${overridePriority || aiTriage.priority}`}>
+                    <span className="w-2 h-2 rounded-full bg-current mr-1.5"></span>
+                    {overridePriority || aiTriage.priority} Priority
+                  </span>
+                  {/* Priority override select */}
+                  <select
+                    value={overridePriority || aiTriage.priority}
+                    onChange={e => setOverridePriority(e.target.value)}
+                    className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700 focus:outline-none"
+                    title="Change priority if needed"
+                  >
+                    <option value="Low">Low (3-5 Days)</option>
+                    <option value="Medium">Medium (24-48h)</option>
+                    <option value="High">High (6-12h)</option>
+                    <option value="Urgent">Urgent (&lt;2h)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* AI Explanation Text */}
+            <div className="bg-white/80 p-3.5 rounded-xl border border-indigo-100 text-xs text-slate-700 leading-relaxed">
+              <span className="font-bold text-slate-900 block mb-1">
+                <i className="fas fa-info-circle text-indigo-500 mr-1.5"></i> Why this suggestion?
+              </span>
+              <p>{aiTriage.explanation}</p>
+            </div>
+
+            <div className="text-[11px] text-slate-500 italic">
+              * AI recommendations are assistive suggestions and do not automatically close tickets. Staff and students can freely modify categories or priorities.
+            </div>
+          </div>
+        )}
+
+        {/* DUPLICATE WARNING CARD (Displayed when duplicate detected) */}
+        {duplicateResult && duplicateResult.isDuplicate && (
+          <div className="bg-amber-50 rounded-2xl border-2 border-amber-300 p-6 shadow-md space-y-4 animate-shake">
+            <div className="flex items-start space-x-3">
+              <div className="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 text-lg shadow-sm">
+                <i className="fas fa-exclamation-triangle"></i>
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-extrabold text-amber-950">
+                    Possible Duplicate Issue Detected! ({duplicateResult.confidence}% Match)
+                  </h3>
+                  <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">
+                    Saves Staff Time
+                  </span>
+                </div>
+                <p className="text-xs text-amber-800 mt-1 leading-relaxed">
+                  A similar open maintenance report already exists for this campus area.
+                  To prevent multiple confusing tickets for the same problem, you can upvote the existing ticket instead of creating a duplicate!
+                </p>
+              </div>
+            </div>
+
+            {/* Matching Report Card Details */}
+            {duplicateResult.matchedReport && (
+              <div className="bg-white rounded-xl border border-amber-200 p-4 shadow-2xs space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-slate-800">
+                    Ticket #{duplicateResult.matchedReport.id}
+                  </span>
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-blue-100 text-blue-800">
+                    Status: {duplicateResult.matchedReport.status}
+                  </span>
+                </div>
+                <div className="text-xs font-bold text-slate-900">
+                  {duplicateResult.matchedReport.title}
+                </div>
+                <p className="text-xs text-slate-600 line-clamp-2">
+                  "{duplicateResult.matchedReport.description}"
+                </p>
+                <div className="flex flex-wrap gap-2 text-[11px] text-slate-500 pt-2 border-t border-slate-100">
+                  <span><i className="fas fa-map-marker-alt text-slate-400 mr-1"></i> {duplicateResult.matchedReport.buildingName}</span>
+                  <span>•</span>
+                  <span><i className="fas fa-door-open text-slate-400 mr-1"></i> {duplicateResult.matchedReport.room}</span>
+                  <span>•</span>
+                  <span className="font-semibold text-amber-700">
+                    <i className="fas fa-thumbs-up mr-1"></i> {duplicateResult.matchedReport.upvotes || 1} Students Upvoted
+                  </span>
+                </div>
+
+                {/* Match Reasons */}
+                {duplicateResult.matchReasons?.length > 0 && (
+                  <div className="text-[11px] text-amber-900 bg-amber-100/60 p-2 rounded-lg mt-2">
+                    <span className="font-bold">Match Rationale: </span>
+                    {duplicateResult.matchReasons.join(' • ')}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Decision Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+              <button
+                type="button"
+                onClick={handleUpvoteExisting}
+                className="flex-1 px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow transition flex items-center justify-center space-x-2"
+              >
+                <i className="fas fa-thumbs-up"></i>
+                <span>+1 Upvote Existing Issue (Recommended)</span>
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-xs font-semibold transition"
+              >
+                <span>Submit as Separate Unique Issue</span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Final Submit Button */}
+        <div className="flex justify-end space-x-3 pt-2">
+          <button
+            type="button"
+            onClick={() => {
+              setTitle('');
+              setDescription('');
+              setRoom('');
+              setPhotoUrl('');
+              setPhotoSelectedObj(null);
+              setAiTriage(null);
+              setDuplicateResult(null);
+            }}
+            className="px-5 py-3 rounded-xl border border-slate-300 text-slate-600 hover:bg-slate-100 text-xs font-semibold transition"
+          >
+            Clear Form
+          </button>
+          <button
+            type="submit"
+            className="px-7 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition transform hover:-translate-y-0.5 flex items-center space-x-2"
+          >
+            <i className="fas fa-paper-plane"></i>
+            <span>Submit Maintenance Report</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+/**
+ * Maintenance Dashboard View (Staff Flow)
+ */
+function DashboardView({ setActiveTab, addToast }) {
+  const [reports, setReports] = useState([]);
+  const [metrics, setMetrics] = useState({ total: 0, open: 0, inProgress: 0, resolved: 0, urgent: 0 });
+
+  // Filters & Search
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('All');
+  const [priorityFilter, setPriorityFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [buildingFilter, setBuildingFilter] = useState('All');
+  const [sortBy, setSortBy] = useState('urgentFirst');
+  const [viewMode, setViewMode] = useState('cards'); // 'cards' | 'table'
+
+  // Modals state
+  const [selectedReportForNotes, setSelectedReportForNotes] = useState(null);
+  const [selectedReportForTriage, setSelectedReportForTriage] = useState(null);
+  const [selectedReportForStaff, setSelectedReportForStaff] = useState(null);
+  const [selectedReportForDetails, setSelectedReportForDetails] = useState(null);
+
+  // Form states in modals
+  const [resolutionNotesInput, setResolutionNotesInput] = useState('');
+  const [assignStaffInput, setAssignStaffInput] = useState('Anil Kumar (Lead Electrician)');
+  const [editCategoryInput, setEditCategoryInput] = useState('Plumbing');
+  const [editPriorityInput, setEditPriorityInput] = useState('Medium');
+
+  const buildings = window.CAMPUS_FIX_SAMPLE_DATA?.buildings || [];
+  const categories = window.CAMPUS_FIX_SAMPLE_DATA?.categories || [];
+
+  const loadData = useCallback(() => {
+    const list = window.CampusFixStorage.getReports();
+    setReports(list);
+    setMetrics(window.CampusFixStorage.getMetrics());
+  }, []);
+
+  useEffect(() => {
+    loadData();
+    const unsubscribe = window.CampusFixStorage.subscribe(() => {
+      loadData();
+    });
+    return unsubscribe;
+  }, [loadData]);
+
+  // Priority Rank map for sorting
+  const priorityWeight = { Urgent: 4, High: 3, Medium: 2, Low: 1 };
+
+  // Filtered & Sorted reports
+  const filteredReports = useMemo(() => {
+    return reports.filter(r => {
+      // Search
+      if (searchQuery.trim()) {
+        const q = searchQuery.toLowerCase();
+        const matches =
+          r.title?.toLowerCase().includes(q) ||
+          r.description?.toLowerCase().includes(q) ||
+          r.id?.toLowerCase().includes(q) ||
+          r.buildingName?.toLowerCase().includes(q) ||
+          r.room?.toLowerCase().includes(q) ||
+          r.reportedBy?.toLowerCase().includes(q);
+        if (!matches) return false;
+      }
+      // Status
+      if (statusFilter !== 'All' && r.status !== statusFilter) return false;
+      // Priority
+      if (priorityFilter !== 'All' && r.priority !== priorityFilter) return false;
+      // Category
+      if (categoryFilter !== 'All' && r.category !== categoryFilter) return false;
+      // Building
+      if (buildingFilter !== 'All' && r.buildingId !== buildingFilter) return false;
+
+      return true;
+    }).sort((a, b) => {
+      if (sortBy === 'urgentFirst') {
+        const weightDiff = (priorityWeight[b.priority] || 0) - (priorityWeight[a.priority] || 0);
+        if (weightDiff !== 0) return weightDiff;
+        return new Date(b.reportedAt) - new Date(a.reportedAt);
+      }
+      if (sortBy === 'newest') {
+        return new Date(b.reportedAt) - new Date(a.reportedAt);
+      }
+      if (sortBy === 'oldest') {
+        return new Date(a.reportedAt) - new Date(b.reportedAt);
+      }
+      if (sortBy === 'upvotes') {
+        return (b.upvotes || 0) - (a.upvotes || 0);
+      }
+      return 0;
+    });
+  }, [reports, searchQuery, statusFilter, priorityFilter, categoryFilter, buildingFilter, sortBy]);
+
+  // Status Change Stepper Handler
+  const handleAdvanceStatus = (report, targetStatus) => {
+    if (targetStatus === 'Resolved') {
+      // Prompt for resolution notes
+      setSelectedReportForNotes(report);
+      setResolutionNotesInput(report.resolutionNotes || 'Issue inspected, repaired and verified.');
+      return;
+    }
+
+    window.CampusFixStorage.updateStatus(report.id, targetStatus, 'Maintenance Staff');
+    addToast({
+      type: 'info',
+      title: 'Status Updated',
+      message: `Report #${report.id} transitioned to "${targetStatus}".`
+    });
+  };
+
+  const handleSaveResolution = () => {
+    if (!selectedReportForNotes) return;
+    window.CampusFixStorage.updateStatus(
+      selectedReportForNotes.id,
+      'Resolved',
+      'Maintenance Staff',
+      resolutionNotesInput
+    );
+    addToast({
+      type: 'success',
+      title: 'Issue Resolved & Closed',
+      message: `Ticket #${selectedReportForNotes.id} marked as Resolved.`
+    });
+    setSelectedReportForNotes(null);
+  };
+
+  const handleSaveStaffAssignment = () => {
+    if (!selectedReportForStaff) return;
+    window.CampusFixStorage.assignStaffMember(
+      selectedReportForStaff.id,
+      assignStaffInput,
+      'Facilities Operations Desk'
+    );
+    addToast({
+      type: 'success',
+      title: 'Technician Dispatched',
+      message: `Report #${selectedReportForStaff.id} assigned to ${assignStaffInput}. Status is now In Progress.`
+    });
+    setSelectedReportForStaff(null);
+  };
+
+  const handleSaveTriageEdit = () => {
+    if (!selectedReportForTriage) return;
+    window.CampusFixStorage.updateTriageDetails(selectedReportForTriage.id, {
+      category: editCategoryInput,
+      priority: editPriorityInput,
+      actorName: 'Maintenance Supervisor',
+      reason: 'Staff manual adjustment'
+    });
+    addToast({
+      type: 'success',
+      title: 'Triage Updated',
+      message: `Ticket #${selectedReportForTriage.id} adjusted to ${editCategoryInput} / ${editPriorityInput}.`
+    });
+    setSelectedReportForTriage(null);
+  };
+
+  const handleDeleteReport = (id) => {
+    if (confirm(`Are you sure you want to delete report #${id}?`)) {
+      window.CampusFixStorage.deleteReport(id);
+      addToast({ type: 'info', title: 'Report Deleted', message: `Report #${id} removed.` });
+    }
+  };
+
+  return (
+    <div className="space-y-6 pb-20">
+      {/* Top Header & Metrics Bar */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
+        <div>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Maintenance Control Dashboard
+            </h1>
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
+              Live Campus Queue
+            </span>
+          </div>
+          <p className="text-xs text-slate-500 mt-1">
+            Real-time campus maintenance tracker: filter by urgency, dispatch technicians, and manage lifecycle.
+          </p>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setActiveTab('report')}
+            className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition flex items-center space-x-1.5"
+          >
+            <i className="fas fa-plus"></i>
+            <span>New Report</span>
+          </button>
+          <button
+            onClick={() => {
+              window.CampusFixStorage.resetToSampleData();
+              addToast({ type: 'info', title: 'Reset to Sample Data', message: 'Restored initial 6 campus reports.' });
+            }}
+            className="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-100 text-slate-700 text-xs font-semibold transition"
+            title="Reset to initial sample reports"
+          >
+            <i className="fas fa-undo-alt mr-1"></i> Reset Data
+          </button>
+        </div>
+      </div>
+
+      {/* KPI Cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div
+          onClick={() => setStatusFilter('All')}
+          className={`cursor-pointer rounded-2xl p-4 border transition ${
+            statusFilter === 'All' ? 'bg-indigo-50/70 border-indigo-300 ring-2 ring-indigo-200' : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between text-slate-500 text-xs font-semibold mb-1">
+            <span>Total Reports</span>
+            <i className="fas fa-folder-open text-indigo-500"></i>
+          </div>
+          <div className="text-2xl font-black text-slate-900">{metrics.total}</div>
+        </div>
+
+        <div
+          onClick={() => setStatusFilter('Open')}
+          className={`cursor-pointer rounded-2xl p-4 border transition ${
+            statusFilter === 'Open' ? 'bg-amber-50/70 border-amber-300 ring-2 ring-amber-200' : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between text-amber-700 text-xs font-semibold mb-1">
+            <span>Open (New)</span>
+            <i className="fas fa-bell text-amber-500"></i>
+          </div>
+          <div className="text-2xl font-black text-amber-700">{metrics.open}</div>
+        </div>
+
+        <div
+          onClick={() => setStatusFilter('In Progress')}
+          className={`cursor-pointer rounded-2xl p-4 border transition ${
+            statusFilter === 'In Progress' ? 'bg-blue-50/70 border-blue-300 ring-2 ring-blue-200' : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between text-blue-700 text-xs font-semibold mb-1">
+            <span>In Progress</span>
+            <i className="fas fa-tools text-blue-500"></i>
+          </div>
+          <div className="text-2xl font-black text-blue-700">{metrics.inProgress}</div>
+        </div>
+
+        <div
+          onClick={() => setStatusFilter('Resolved')}
+          className={`cursor-pointer rounded-2xl p-4 border transition ${
+            statusFilter === 'Resolved' ? 'bg-emerald-50/70 border-emerald-300 ring-2 ring-emerald-200' : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between text-emerald-700 text-xs font-semibold mb-1">
+            <span>Resolved</span>
+            <i className="fas fa-check-circle text-emerald-500"></i>
+          </div>
+          <div className="text-2xl font-black text-emerald-700">{metrics.resolved}</div>
+        </div>
+
+        <div
+          onClick={() => { setPriorityFilter('Urgent'); setStatusFilter('All'); }}
+          className={`cursor-pointer rounded-2xl p-4 border transition col-span-2 sm:col-span-1 ${
+            priorityFilter === 'Urgent' ? 'bg-red-50/70 border-red-300 ring-2 ring-red-200' : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between text-red-700 text-xs font-semibold mb-1">
+            <span>Urgent Hazards</span>
+            <i className="fas fa-exclamation-triangle text-red-500"></i>
+          </div>
+          <div className="text-2xl font-black text-red-700">{metrics.urgent}</div>
+        </div>
+      </div>
+
+      {/* Filter & Search Bar */}
+      <div className="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm space-y-3">
+        <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+          {/* Search Box */}
+          <div className="relative flex-1">
+            <i className="fas fa-search absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              placeholder="Search by keyword, room, location, ticket #CF-..., or student name..."
+              className="w-full pl-9 pr-8 py-2 rounded-xl border border-slate-300 text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
+              >
+                <i className="fas fa-times"></i>
+              </button>
+            )}
+          </div>
+
+          {/* Quick Selectors */}
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Status Dropdown */}
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="All">Status: All</option>
+              <option value="Open">Open Only</option>
+              <option value="In Progress">In Progress Only</option>
+              <option value="Resolved">Resolved Only</option>
+            </select>
+
+            {/* Priority Dropdown */}
+            <select
+              value={priorityFilter}
+              onChange={e => setPriorityFilter(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="All">Priority: All</option>
+              <option value="Urgent">🚨 Urgent (&lt;2h SLA)</option>
+              <option value="High">⚠️ High Priority</option>
+              <option value="Medium">Medium Priority</option>
+              <option value="Low">Low Priority</option>
+            </select>
+
+            {/* Category Dropdown */}
+            <select
+              value={categoryFilter}
+              onChange={e => setCategoryFilter(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="All">Category: All</option>
+              {categories.map(c => (
+                <option key={c.id} value={c.id}>{c.name}</option>
+              ))}
+            </select>
+
+            {/* Sort Dropdown */}
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+              className="px-3 py-2 rounded-xl border border-slate-300 text-xs font-semibold text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="urgentFirst">Sort: Urgent Hazards First</option>
+              <option value="newest">Sort: Newest First</option>
+              <option value="oldest">Sort: Oldest First</option>
+              <option value="upvotes">Sort: Most Upvoted</option>
+            </select>
+
+            {/* View Mode Toggle */}
+            <div className="flex rounded-xl border border-slate-200 bg-slate-100 p-0.5">
+              <button
+                onClick={() => setViewMode('cards')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs transition ${
+                  viewMode === 'cards' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Card Grid View"
+              >
+                <i className="fas fa-th-large"></i>
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                className={`px-2.5 py-1.5 rounded-lg text-xs transition ${
+                  viewMode === 'table' ? 'bg-white text-indigo-700 shadow-xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Dense Table View"
+              >
+                <i className="fas fa-list"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Active Filter Indicators */}
+        {(statusFilter !== 'All' || priorityFilter !== 'All' || categoryFilter !== 'All' || searchQuery) && (
+          <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100 text-xs">
+            <span className="text-slate-400 text-[11px]">Filtered by:</span>
+            {statusFilter !== 'All' && (
+              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold flex items-center">
+                Status: {statusFilter}
+                <button onClick={() => setStatusFilter('All')} className="ml-1 text-slate-400 hover:text-slate-600">&times;</button>
+              </span>
+            )}
+            {priorityFilter !== 'All' && (
+              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold flex items-center">
+                Priority: {priorityFilter}
+                <button onClick={() => setPriorityFilter('All')} className="ml-1 text-slate-400 hover:text-slate-600">&times;</button>
+              </span>
+            )}
+            {categoryFilter !== 'All' && (
+              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold flex items-center">
+                Category: {categoryFilter}
+                <button onClick={() => setCategoryFilter('All')} className="ml-1 text-slate-400 hover:text-slate-600">&times;</button>
+              </span>
+            )}
+            {searchQuery && (
+              <span className="bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md text-[11px] font-semibold flex items-center">
+                Query: "{searchQuery}"
+                <button onClick={() => setSearchQuery('')} className="ml-1 text-slate-400 hover:text-slate-600">&times;</button>
+              </span>
+            )}
+            <button
+              onClick={() => {
+                setStatusFilter('All');
+                setPriorityFilter('All');
+                setCategoryFilter('All');
+                setSearchQuery('');
+              }}
+              className="text-[11px] text-indigo-600 hover:underline font-semibold ml-1"
+            >
+              Clear all filters
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Reports Count Summary */}
+      <div className="flex items-center justify-between text-xs text-slate-500 px-1">
+        <span>Showing <strong>{filteredReports.length}</strong> of {reports.length} campus issues</span>
+        {filteredReports.some(r => r.priority === 'Urgent' && r.status !== 'Resolved') && (
+          <span className="text-red-600 font-bold animate-pulse flex items-center">
+            <i className="fas fa-exclamation-triangle mr-1"></i> Urgent Action Required in Queue
+          </span>
+        )}
+      </div>
+
+      {/* Empty State */}
+      {filteredReports.length === 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center space-y-3">
+          <div className="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mx-auto text-2xl">
+            <i className="fas fa-clipboard-check"></i>
+          </div>
+          <h3 className="font-bold text-slate-800 text-base">No Matching Reports Found</h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Try adjusting your search query or reset the filters to see active campus maintenance tickets.
+          </p>
+          <button
+            onClick={() => {
+              setStatusFilter('All');
+              setPriorityFilter('All');
+              setCategoryFilter('All');
+              setSearchQuery('');
+            }}
+            className="px-4 py-2 rounded-xl bg-indigo-50 text-indigo-700 text-xs font-bold hover:bg-indigo-100 transition"
+          >
+            Reset Filters
+          </button>
+        </div>
+      )}
+
+      {/* Reports Display: CARD VIEW */}
+      {viewMode === 'cards' && filteredReports.length > 0 && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {filteredReports.map(report => (
+            <div
+              key={report.id}
+              className={`report-card bg-white rounded-2xl border p-5 shadow-2xs space-y-4 flex flex-col justify-between ${
+                report.priority === 'Urgent' && report.status !== 'Resolved'
+                  ? 'border-red-300 ring-1 ring-red-200'
+                  : 'border-slate-200'
+              }`}
+            >
+              {/* Header: Photo Thumbnail, Title & Category */}
+              <div>
+                <div className="flex items-start space-x-3">
+                  {/* Thumbnail */}
+                  <div
+                    onClick={() => setSelectedReportForDetails(report)}
+                    className="w-20 h-20 rounded-xl overflow-hidden bg-slate-100 flex-shrink-0 cursor-pointer border border-slate-200 relative group"
+                  >
+                    <img
+                      src={report.photoUrl || 'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?auto=format&fit=crop&w=400&q=80'}
+                      alt={report.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition"
+                    />
+                    <div className="absolute inset-0 bg-slate-900/30 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition">
+                      <i className="fas fa-expand"></i>
+                    </div>
+                  </div>
+
+                  {/* Title & Metadata */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-1 mb-1">
+                      <span className="font-mono text-[11px] font-bold text-slate-500">
+                        #{report.id}
+                      </span>
+                      <div className="flex items-center space-x-1">
+                        {/* Duplicate Tag if applicable */}
+                        {report.linkedDuplicateId && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200" title={`Linked to original ticket #${report.linkedDuplicateId}`}>
+                            <i className="fas fa-copy mr-0.5"></i> Linked
+                          </span>
+                        )}
+                        {/* Priority Badge */}
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border pri-badge-${report.priority}`}>
+                          {report.priority}
+                        </span>
+                      </div>
+                    </div>
+
+                    <h3
+                      onClick={() => setSelectedReportForDetails(report)}
+                      className="text-xs font-bold text-slate-900 line-clamp-1 hover:text-indigo-600 cursor-pointer"
+                    >
+                      {report.title}
+                    </h3>
+
+                    <div className="flex flex-wrap items-center gap-1.5 mt-1.5 text-[11px] text-slate-500">
+                      <span className={`px-2 py-0.5 rounded-md font-semibold text-[10px] border cat-badge-${report.category}`}>
+                        {report.category}
+                      </span>
+                      <span>•</span>
+                      <span className="truncate max-w-[150px]">
+                        <i className="fas fa-map-marker-alt text-slate-400 mr-1"></i>
+                        {report.buildingName}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Description snippet */}
+                <p className="text-xs text-slate-600 line-clamp-2 mt-3 leading-relaxed">
+                  {report.description}
+                </p>
+
+                {/* Room / Landmark pill */}
+                <div className="mt-2.5 flex items-center justify-between text-[11px] text-slate-500 bg-slate-50 px-2.5 py-1.5 rounded-lg border border-slate-100">
+                  <span className="truncate">
+                    <i className="fas fa-door-open text-slate-400 mr-1.5"></i>
+                    <strong>Location:</strong> {report.room || 'General Area'}
+                  </span>
+                  <span className="flex-shrink-0 text-slate-400 text-[10px]">
+                    <i className="far fa-clock mr-1"></i>
+                    {new Date(report.reportedAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </span>
+                </div>
+
+                {/* AI Rationale Snippet (Expandable or preview) */}
+                {report.aiTriage?.explanation && (
+                  <div className="mt-2 text-[11px] text-slate-500 bg-indigo-50/50 border border-indigo-100/70 rounded-lg p-2 leading-relaxed">
+                    <span className="font-bold text-indigo-900">
+                      <i className="fas fa-brain text-indigo-500 mr-1"></i> AI Triage Note:
+                    </span>{' '}
+                    {report.aiTriage.explanation}
+                  </div>
+                )}
+
+                {/* Assigned Technician or Resolution Note */}
+                {report.assignedStaff && (
+                  <div className="mt-2 text-[11px] text-blue-900 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 flex items-center justify-between">
+                    <span>
+                      <i className="fas fa-user-hard-hat text-blue-500 mr-1.5"></i>
+                      <strong>Technician:</strong> {report.assignedStaff}
+                    </span>
+                  </div>
+                )}
+
+                {report.status === 'Resolved' && report.resolutionNotes && (
+                  <div className="mt-2 text-[11px] text-emerald-900 bg-emerald-50 px-2.5 py-1.5 rounded-lg border border-emerald-100">
+                    <i className="fas fa-check-double text-emerald-600 mr-1"></i>
+                    <strong>Resolution Note:</strong> {report.resolutionNotes}
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom: 3-Step Interactive Status Stepper & Actions */}
+              <div className="pt-3 border-t border-slate-100 space-y-3">
+                {/* Visual Status Progression */}
+                <div className="flex items-center justify-between text-[11px]">
+                  <span className="font-semibold text-slate-600">Workflow Status:</span>
+                  <span className={`font-bold px-2 py-0.5 rounded text-[10px] uppercase border status-badge-${report.status.replace(/\s+/g, '')}`}>
+                    {report.status}
+                  </span>
+                </div>
+
+                {/* Stepper Buttons: Open -> In Progress -> Resolved */}
+                <div className="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl">
+                  <button
+                    onClick={() => handleAdvanceStatus(report, 'Open')}
+                    className={`py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1 ${
+                      report.status === 'Open'
+                        ? 'bg-amber-500 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    }`}
+                  >
+                    <i className="fas fa-clock text-[10px]"></i>
+                    <span>Open</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleAdvanceStatus(report, 'In Progress')}
+                    className={`py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1 ${
+                      report.status === 'In Progress'
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    }`}
+                  >
+                    <i className="fas fa-wrench text-[10px]"></i>
+                    <span>In Progress</span>
+                  </button>
+
+                  <button
+                    onClick={() => handleAdvanceStatus(report, 'Resolved')}
+                    className={`py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1 ${
+                      report.status === 'Resolved'
+                        ? 'bg-emerald-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    }`}
+                  >
+                    <i className="fas fa-check text-[10px]"></i>
+                    <span>Resolved</span>
+                  </button>
+                </div>
+
+                {/* Sub-Actions Toolbar */}
+                <div className="flex items-center justify-between pt-1 text-xs">
+                  <div className="flex space-x-1">
+                    <button
+                      onClick={() => {
+                        setSelectedReportForStaff(report);
+                        setAssignStaffInput(report.assignedStaff || 'Anil Kumar (Lead Electrician)');
+                      }}
+                      className="px-2 py-1 rounded-md text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition text-[11px] font-semibold"
+                      title="Assign Staff / Technician"
+                    >
+                      <i className="fas fa-user-plus mr-1"></i> Assign
+                    </button>
+                    <button
+                      onClick={() => {
+                        setSelectedReportForTriage(report);
+                        setEditCategoryInput(report.category);
+                        setEditPriorityInput(report.priority);
+                      }}
+                      className="px-2 py-1 rounded-md text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 transition text-[11px] font-semibold"
+                      title="Edit Category or Priority"
+                    >
+                      <i className="fas fa-sliders-h mr-1"></i> Edit Triage
+                    </button>
+                  </div>
+
+                  <div className="flex items-center space-x-2">
+                    <button
+                      onClick={() => {
+                        window.CampusFixStorage.upvoteReport(report.id, 'Staff Upvote');
+                        addToast({ type: 'info', title: 'Upvoted', message: `Report #${report.id} received +1 student verification.` });
+                      }}
+                      className="text-slate-500 hover:text-indigo-600 text-xs font-semibold flex items-center space-x-1"
+                      title="Upvote / Student Verification count"
+                    >
+                      <i className="fas fa-thumbs-up"></i>
+                      <span>{report.upvotes || 1}</span>
+                    </button>
+                    <button
+                      onClick={() => handleDeleteReport(report.id)}
+                      className="text-slate-400 hover:text-red-600 text-xs p-1"
+                      title="Delete Report"
+                    >
+                      <i className="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Reports Display: DENSE TABLE VIEW */}
+      {viewMode === 'table' && filteredReports.length > 0 && (
+        <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 text-slate-700 font-semibold uppercase tracking-wider text-[11px] border-b border-slate-200">
+                <tr>
+                  <th className="py-3 px-4">Ticket</th>
+                  <th className="py-3 px-4">Issue Description</th>
+                  <th className="py-3 px-4">Location</th>
+                  <th className="py-3 px-4">Category</th>
+                  <th className="py-3 px-4">Priority</th>
+                  <th className="py-3 px-4">Status & Action</th>
+                  <th className="py-3 px-4 text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-slate-700">
+                {filteredReports.map(report => (
+                  <tr key={report.id} className="hover:bg-slate-50/60 transition">
+                    <td className="py-3 px-4 font-mono font-bold text-slate-500">
+                      #{report.id}
+                    </td>
+                    <td className="py-3 px-4 max-w-xs">
+                      <div
+                        onClick={() => setSelectedReportForDetails(report)}
+                        className="font-bold text-slate-900 hover:text-indigo-600 cursor-pointer truncate"
+                      >
+                        {report.title}
+                      </div>
+                      <div className="text-[11px] text-slate-500 truncate">
+                        {report.description}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-[11px]">
+                      <div className="font-medium text-slate-800">{report.buildingName}</div>
+                      <div className="text-slate-400">{report.room}</div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold border cat-badge-${report.category}`}>
+                        {report.category}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border pri-badge-${report.priority}`}>
+                        {report.priority}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4">
+                      <select
+                        value={report.status}
+                        onChange={e => handleAdvanceStatus(report, e.target.value)}
+                        className="text-xs bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 font-semibold text-slate-700 focus:outline-none"
+                      >
+                        <option value="Open">Open</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="Resolved">Resolved</option>
+                      </select>
+                    </td>
+                    <td className="py-3 px-4 text-right space-x-2">
+                      <button
+                        onClick={() => setSelectedReportForDetails(report)}
+                        className="p-1.5 text-slate-500 hover:text-indigo-600"
+                        title="View Full Details"
+                      >
+                        <i className="fas fa-eye"></i>
+                      </button>
+                      <button
+                        onClick={() => handleDeleteReport(report.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-600"
+                        title="Delete Report"
+                      >
+                        <i className="fas fa-trash-alt"></i>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Resolution Notes when marking Resolved */}
+      {selectedReportForNotes && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center">
+                <i className="fas fa-check-circle text-emerald-500 mr-2"></i>
+                Mark Report #{selectedReportForNotes.id} as Resolved
+              </h3>
+              <button
+                onClick={() => setSelectedReportForNotes(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                &times;
+              </button>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Resolution Notes / Work Performed
+              </label>
+              <textarea
+                value={resolutionNotesInput}
+                onChange={e => setResolutionNotesInput(e.target.value)}
+                rows={3}
+                placeholder="Describe what repair was done (e.g. Replaced leaking valve, tested electrical line)..."
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+              />
+            </div>
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setSelectedReportForNotes(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveResolution}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow"
+              >
+                Confirm & Close Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Assign Technician */}
+      {selectedReportForStaff && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center">
+                <i className="fas fa-user-hard-hat text-blue-500 mr-2"></i>
+                Assign Technician for #{selectedReportForStaff.id}
+              </h3>
+              <button
+                onClick={() => setSelectedReportForStaff(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                &times;
+              </button>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-700 mb-1">
+                Select Technician or Maintenance Unit
+              </label>
+              <select
+                value={assignStaffInput}
+                onChange={e => setAssignStaffInput(e.target.value)}
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white mb-2"
+              >
+                <option value="Anil Kumar (Lead Electrician, Unit 1)">Anil Kumar (Lead Electrician, Unit 1)</option>
+                <option value="Rajesh Sharma (Senior Plumber, Unit 2)">Rajesh Sharma (Senior Plumber, Unit 2)</option>
+                <option value="Sunita Devi (Sanitation & Cleaning Lead)">Sunita Devi (Sanitation & Cleaning Lead)</option>
+                <option value="Vikram Singh (Carpentry & Civil Works)">Vikram Singh (Carpentry & Civil Works)</option>
+                <option value="Campus Rapid Response Team">Campus Rapid Response Team</option>
+              </select>
+              <input
+                type="text"
+                value={assignStaffInput}
+                onChange={e => setAssignStaffInput(e.target.value)}
+                placeholder="Or type custom technician name..."
+                className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setSelectedReportForStaff(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveStaffAssignment}
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold shadow"
+              >
+                Dispatch & Mark In Progress
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Edit Triage Details (Staff Override) */}
+      {selectedReportForTriage && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-slate-900 text-sm flex items-center">
+                <i className="fas fa-sliders-h text-indigo-500 mr-2"></i>
+                Adjust Triage for #{selectedReportForTriage.id}
+              </h3>
+              <button
+                onClick={() => setSelectedReportForTriage(null)}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Category</label>
+                <select
+                  value={editCategoryInput}
+                  onChange={e => setEditCategoryInput(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
+                >
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Priority</label>
+                <select
+                  value={editPriorityInput}
+                  onChange={e => setEditPriorityInput(e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none bg-white"
+                >
+                  <option value="Urgent">Urgent (&lt;2 Hours SLA)</option>
+                  <option value="High">High (6-12 Hours SLA)</option>
+                  <option value="Medium">Medium (24-48 Hours SLA)</option>
+                  <option value="Low">Low (3-5 Days SLA)</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                onClick={() => setSelectedReportForTriage(null)}
+                className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 text-xs font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveTriageEdit}
+                className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow"
+              >
+                Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL: Full Report Details & Audit Trail */}
+      {selectedReportForDetails && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 shadow-2xl space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <div>
+                <span className="font-mono text-xs font-bold text-slate-400">
+                  Ticket #{selectedReportForDetails.id}
+                </span>
+                <h3 className="font-bold text-slate-900 text-base">
+                  {selectedReportForDetails.title}
+                </h3>
+              </div>
+              <button
+                onClick={() => setSelectedReportForDetails(null)}
+                className="text-slate-400 hover:text-slate-600 text-lg"
+              >
+                &times;
+              </button>
+            </div>
+
+            {/* Photo preview */}
+            <div className="rounded-xl overflow-hidden border border-slate-200 h-64 bg-slate-900">
+              <img
+                src={selectedReportForDetails.photoUrl}
+                alt={selectedReportForDetails.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2">
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border cat-badge-${selectedReportForDetails.category}`}>
+                {selectedReportForDetails.category}
+              </span>
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border pri-badge-${selectedReportForDetails.priority}`}>
+                {selectedReportForDetails.priority} Priority
+              </span>
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-bold border status-badge-${selectedReportForDetails.status.replace(/\s+/g, '')}`}>
+                Status: {selectedReportForDetails.status}
+              </span>
+              <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                <i className="fas fa-thumbs-up text-indigo-500 mr-1"></i> {selectedReportForDetails.upvotes || 1} Upvotes
+              </span>
+            </div>
+
+            {/* Description */}
+            <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-xs text-slate-700 leading-relaxed">
+              <span className="font-bold text-slate-900 block mb-1">Description:</span>
+              <p>{selectedReportForDetails.description}</p>
+            </div>
+
+            {/* AI Explanation */}
+            {selectedReportForDetails.aiTriage && (
+              <div className="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-100 text-xs text-slate-700 leading-relaxed">
+                <span className="font-bold text-indigo-900 block mb-1">
+                  <i className="fas fa-brain text-indigo-500 mr-1"></i> AI Triage Rationale ({selectedReportForDetails.aiTriage.engine}):
+                </span>
+                <p>{selectedReportForDetails.aiTriage.explanation}</p>
+              </div>
+            )}
+
+            {/* Location & Reporter Details */}
+            <div className="grid grid-cols-2 gap-3 text-xs bg-slate-50 p-3 rounded-xl">
+              <div>
+                <span className="text-slate-400 font-medium block">Building:</span>
+                <span className="font-bold text-slate-800">{selectedReportForDetails.buildingName}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-medium block">Room / Landmark:</span>
+                <span className="font-bold text-slate-800">{selectedReportForDetails.room}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-medium block">Reported By:</span>
+                <span className="font-bold text-slate-800">{selectedReportForDetails.reportedBy}</span>
+              </div>
+              <div>
+                <span className="text-slate-400 font-medium block">Contact:</span>
+                <span className="font-bold text-slate-800">{selectedReportForDetails.studentContact || 'N/A'}</span>
+              </div>
+            </div>
+
+            {/* History / Audit Trail */}
+            {selectedReportForDetails.history && selectedReportForDetails.history.length > 0 && (
+              <div>
+                <h4 className="font-bold text-xs text-slate-800 mb-2">Audit History & Timeline</h4>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {selectedReportForDetails.history.map((h, idx) => (
+                    <div key={idx} className="text-[11px] p-2 rounded-lg bg-slate-50 border border-slate-100 flex items-start justify-between">
+                      <div>
+                        <div className="font-semibold text-slate-800">{h.action}</div>
+                        <div className="text-slate-400 text-[10px]">By: {h.actor}</div>
+                      </div>
+                      <span className="text-slate-400 text-[10px] whitespace-nowrap ml-2">
+                        {new Date(h.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setSelectedReportForDetails(null)}
+                className="px-5 py-2 rounded-xl bg-slate-800 text-white text-xs font-bold hover:bg-slate-900 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Hackathon Tour Modal (Guided 6-Step Script for Judges)
+ */
+function HackathonTourModal({ isOpen, onClose, setActiveTab, onTriggerPreset }) {
+  if (!isOpen) return null;
+
+  const [step, setStep] = useState(1);
+
+  const steps = [
+    {
+      title: 'Step 1: The Campus Problem',
+      badge: 'Context',
+      icon: 'fa-university',
+      content: 'In college campuses, daily maintenance issues (leaking washroom taps, broken classroom fans, sparking wires, blocked wheelchair ramps) are reported via random WhatsApp messages or phone calls. Reports get lost, urgent hazards are delayed, and identical issues are reported multiple times by different students.',
+      actionText: 'Next: Student Report Flow',
+      onAction: () => setStep(2)
+    },
+    {
+      title: 'Step 2: Student Friction-Free Report',
+      badge: 'Reporting',
+      icon: 'fa-camera',
+      content: 'Students open "Report an Issue", snap or select a photo of the defect, choose their building and room, and write a quick description. No tedious paperwork or app installation required.',
+      actionText: 'Load Leaking Tap Scenario',
+      onAction: () => {
+        onTriggerPreset(window.CAMPUS_FIX_SAMPLE_DATA.demoPresets[0]);
+        setActiveTab('report');
+        setStep(3);
+      }
+    },
+    {
+      title: 'Step 3: Instant AI Triage',
+      badge: 'AI Engine',
+      icon: 'fa-brain',
+      content: 'The CampusFix AI Engine analyzes the report and recommends Category ("Plumbing") and Priority ("Medium") along with a human-readable explanation ("Continuous water leakage detected from tap fixture; medium priority due to water wastage and slipping hazard"). It also supports real multimodal Google Gemini Vision API!',
+      actionText: 'Next: Duplicate Detection',
+      onAction: () => setStep(4)
+    },
+    {
+      title: 'Step 4: Intelligent Duplicate Detection',
+      badge: 'Duplicate Scanner',
+      icon: 'fa-copy',
+      content: 'If another student reports a leaking tap in the same washroom, CampusFix AI spots the location & keyword match, warns the student with a 92% duplicate score, and lets them "+1 Upvote" the existing ticket instead of cluttering staff queues.',
+      actionText: 'Test Duplicate Scenario',
+      onAction: () => {
+        onTriggerPreset(window.CAMPUS_FIX_SAMPLE_DATA.demoPresets[3]);
+        setActiveTab('report');
+        setStep(5);
+      }
+    },
+    {
+      title: 'Step 5: Maintenance Staff Dashboard',
+      badge: 'Operations',
+      icon: 'fa-columns',
+      content: 'The facilities crew sees all reports sorted by urgency. Critical electrical hazards and accessibility blocks immediately rise to the top with strict SLAs (<2 Hours). Staff can filter by category, building, or status.',
+      actionText: 'View Dashboard',
+      onAction: () => {
+        setActiveTab('dashboard');
+        setStep(6);
+      }
+    },
+    {
+      title: 'Step 6: Lifecycle Management & Close',
+      badge: 'Resolution',
+      icon: 'fa-check-circle',
+      content: 'Staff moves tickets through Open ➔ In Progress (assigning technicians like Anil Kumar) ➔ Resolved (adding resolution notes). The student can verify the repair, closing the loop completely!',
+      actionText: 'Finish Hackathon Tour',
+      onAction: () => {
+        onClose();
+        setActiveTab('dashboard');
+      }
+    }
+  ];
+
+  const current = steps[step - 1];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-xs animate-fadeIn">
+      <div className="bg-white rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-6 relative border border-slate-200">
+        {/* Header */}
+        <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+          <div className="flex items-center space-x-2.5">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center font-bold text-sm shadow">
+              <i className="fas fa-rocket"></i>
+            </div>
+            <div>
+              <h3 className="font-bold text-slate-900 text-base">CampusFix AI — Hackathon Tour</h3>
+              <p className="text-[11px] text-slate-400">Step-by-step evaluator walkthrough</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl font-bold">
+            &times;
+          </button>
+        </div>
+
+        {/* Stepper Progress Dots */}
+        <div className="flex items-center justify-between px-2">
+          {steps.map((s, idx) => (
+            <div
+              key={idx}
+              onClick={() => setStep(idx + 1)}
+              className={`cursor-pointer flex flex-col items-center ${idx + 1 === step ? 'scale-110' : 'opacity-60'}`}
+            >
+              <div
+                className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition ${
+                  idx + 1 === step
+                    ? 'bg-indigo-600 text-white ring-4 ring-indigo-100'
+                    : idx + 1 < step
+                    ? 'bg-emerald-500 text-white'
+                    : 'bg-slate-200 text-slate-600'
+                }`}
+              >
+                {idx + 1 < step ? <i className="fas fa-check text-[10px]"></i> : idx + 1}
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Step Content */}
+        <div className="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-indigo-700 uppercase tracking-wider flex items-center">
+              <i className={`fas ${current.icon} mr-1.5 text-indigo-600`}></i>
+              {current.title}
+            </span>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-700">
+              {current.badge}
+            </span>
+          </div>
+          <p className="text-xs text-slate-700 leading-relaxed">
+            {current.content}
+          </p>
+        </div>
+
+        {/* Buttons */}
+        <div className="flex items-center justify-between pt-2">
+          <button
+            disabled={step === 1}
+            onClick={() => setStep(step - 1)}
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-slate-900 disabled:opacity-30 disabled:cursor-not-allowed"
+          >
+            <i className="fas fa-arrow-left mr-1"></i> Previous
+          </button>
+          <button
+            onClick={current.onAction}
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md transition flex items-center space-x-1.5"
+          >
+            <span>{current.actionText}</span>
+            <i className="fas fa-arrow-right text-[10px]"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Settings & AI Configuration Modal
+ */
+function SettingsModal({ isOpen, onClose, addToast }) {
+  if (!isOpen) return null;
+
+  const [settings, setSettings] = useState(window.CampusFixStorage.getSettings());
+  const [apiKeyInput, setApiKeyInput] = useState(settings.geminiApiKey || '');
+  const [useGemini, setUseGemini] = useState(settings.useGeminiAPI || false);
+  const [campusName, setCampusName] = useState(settings.campusName || 'Apex Institute of Technology & Sciences');
+
+  const handleSave = () => {
+    const updated = {
+      ...settings,
+      campusName,
+      useGeminiAPI: useGemini,
+      geminiApiKey: apiKeyInput.trim()
+    };
+    window.CampusFixStorage.saveSettings(updated);
+    addToast({ type: 'success', title: 'Settings Saved', message: 'AI configuration updated successfully.' });
+    onClose();
+  };
+
+  const handleResetData = () => {
+    if (confirm('Reset all issues to default sample data?')) {
+      window.CampusFixStorage.resetToSampleData();
+      addToast({ type: 'info', title: 'Data Reset', message: 'Restored original demo reports.' });
+      onClose();
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn">
+      <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5 border border-slate-200">
+        <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm">
+              <i className="fas fa-sliders-h"></i>
+            </div>
+            <h3 className="font-bold text-slate-900 text-base">CampusFix Settings</h3>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-lg font-bold">
+            &times;
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {/* Campus Name */}
+          <div>
+            <label className="block text-xs font-bold text-slate-700 mb-1">Campus Name</label>
+            <input
+              type="text"
+              value={campusName}
+              onChange={e => setCampusName(e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+            />
+          </div>
+
+          {/* AI Engine Mode Toggle */}
+          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-xs font-bold text-slate-900">AI Engine Mode</div>
+                <div className="text-[11px] text-slate-500">
+                  {useGemini ? 'Google Gemini 2.5 Flash Vision' : 'Smart Heuristics (Local Demo Engine)'}
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setUseGemini(!useGemini)}
+                className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  useGemini ? 'bg-indigo-600' : 'bg-slate-300'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    useGemini ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
+
+            {useGemini ? (
+              <div className="space-y-2 pt-2 border-t border-slate-200">
+                <label className="block text-[11px] font-bold text-slate-700">
+                  Google Gemini API Key
+                </label>
+                <input
+                  type="password"
+                  value={apiKeyInput}
+                  onChange={e => setApiKeyInput(e.target.value)}
+                  placeholder="AIzaSy..."
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+                />
+                <p className="text-[10px] text-slate-500">
+                  Key is saved locally in your browser only. When connected, real image & text analysis will run on Gemini.
+                </p>
+              </div>
+            ) : (
+              <div className="text-[11px] text-emerald-800 bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 leading-relaxed">
+                <i className="fas fa-check-circle text-emerald-600 mr-1"></i>
+                <strong>Zero-Config Local Demo Engine Active:</strong> Instant hazard detection, category classification, and duplicate detection work 100% offline without needing any API key!
+              </div>
+            )}
+          </div>
+
+          {/* Reset Database */}
+          <div className="pt-2 border-t border-slate-100 flex items-center justify-between">
+            <span className="text-xs text-slate-600 font-medium">Reset Demo Database</span>
+            <button
+              onClick={handleResetData}
+              className="px-3 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition"
+            >
+              Reset Data
+            </button>
+          </div>
+        </div>
+
+        <div className="flex justify-end space-x-2 pt-3 border-t border-slate-100">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-xl border border-slate-300 text-slate-600 text-xs font-semibold"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow"
+          >
+            Save Settings
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Export components to window
+window.CampusFixComponents = {
+  ToastContainer,
+  Navbar,
+  OverviewView,
+  ReportFormView,
+  DashboardView,
+  HackathonTourModal,
+  SettingsModal
+};
+
+
+// CampusFix AI - Main Application Controller
+(function () {
+  'use strict';
+
+  const { useState, useEffect, useCallback } = React;
+  const {
+    ToastContainer,
+    Navbar,
+    OverviewView,
+    ReportFormView,
+    DashboardView,
+    HackathonTourModal,
+    SettingsModal
+  } = window.CampusFixComponents;
+
+  function App() {
+    // Determine active tab from URL hash or default to 'overview'
+    const getInitialTab = () => {
+      const hash = window.location.hash.replace('#', '');
+      if (['overview', 'report', 'dashboard'].includes(hash)) {
+        return hash;
+      }
+      return 'overview';
+    };
+
+    const [activeTab, setActiveTabState] = useState(getInitialTab);
+    const [metrics, setMetrics] = useState({ total: 0, open: 0, inProgress: 0, resolved: 0, urgent: 0 });
+    const [toasts, setToasts] = useState([]);
+    const [isTourOpen, setIsTourOpen] = useState(false);
+    const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [presetToLoad, setPresetToLoad] = useState(null);
+
+    // Sync active tab with browser hash
+    const setActiveTab = useCallback((tab) => {
+      setActiveTabState(tab);
+      window.location.hash = tab;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, []);
+
+    // Listen for hash changes
+    useEffect(() => {
+      const handleHashChange = () => {
+        const hash = window.location.hash.replace('#', '');
+        if (['overview', 'report', 'dashboard'].includes(hash)) {
+          setActiveTabState(hash);
+        }
+      };
+      window.addEventListener('hashchange', handleHashChange);
+      return () => window.removeEventListener('hashchange', handleHashChange);
+    }, []);
+
+    // Toast Manager
+    const addToast = useCallback((toast) => {
+      const id = Date.now() + Math.random().toString(36).substring(2, 6);
+      const newToast = { ...toast, id };
+      setToasts(prev => [...prev, newToast]);
+      setTimeout(() => {
+        setToasts(prev => prev.filter(t => t.id !== id));
+      }, toast.duration || 4500);
+    }, []);
+
+    const removeToast = useCallback((id) => {
+      setToasts(prev => prev.filter(t => t.id !== id));
+    }, []);
+
+    // Refresh metrics on mount and when storage updates
+    const refreshMetrics = useCallback(() => {
+      if (window.CampusFixStorage) {
+        setMetrics(window.CampusFixStorage.getMetrics());
+      }
+    }, []);
+
+    useEffect(() => {
+      refreshMetrics();
+      const unsubscribe = window.CampusFixStorage.subscribe(() => {
+        refreshMetrics();
+      });
+      return unsubscribe;
+    }, [refreshMetrics]);
+
+    // Handle 1-click Preset Trigger from Overview or Tour
+    const handleTriggerDemoPreset = useCallback((preset) => {
+      setPresetToLoad(preset);
+      setActiveTab('report');
+      addToast({
+        type: 'info',
+        title: 'Scenario Loaded',
+        message: `Loaded: ${preset.label}. AI Triage preview running...`
+      });
+    }, [setActiveTab, addToast]);
+
+    const handleReportCreated = useCallback((newReport) => {
+      refreshMetrics();
+    }, [refreshMetrics]);
+
+    return (
+      <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+        {/* Navigation Bar */}
+        <Navbar
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          metrics={metrics}
+          onOpenTour={() => setIsTourOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+        />
+
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8">
+          {activeTab === 'overview' && (
+            <OverviewView
+              setActiveTab={setActiveTab}
+              metrics={metrics}
+              onOpenTour={() => setIsTourOpen(true)}
+              onTriggerDemoPreset={handleTriggerDemoPreset}
+            />
+          )}
+
+          {activeTab === 'report' && (
+            <ReportFormView
+              setActiveTab={setActiveTab}
+              onReportCreated={handleReportCreated}
+              addToast={addToast}
+              presetToLoad={presetToLoad}
+              clearPresetToLoad={() => setPresetToLoad(null)}
+            />
+          )}
+
+          {activeTab === 'dashboard' && (
+            <DashboardView
+              setActiveTab={setActiveTab}
+              addToast={addToast}
+            />
+          )}
+        </main>
+
+        {/* Global Footer */}
+        <footer className="border-t border-slate-200 bg-white py-6 mt-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between text-xs text-slate-500 gap-3">
+            <div className="flex items-center space-x-2">
+              <span className="font-bold text-slate-800">CampusFix AI</span>
+              <span>— College Campus Facility Maintenance & Smart Triage System</span>
+            </div>
+            <div className="flex items-center space-x-4">
+              <span className="inline-flex items-center text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded text-[11px] font-semibold border border-emerald-200">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                Demo Heuristic Engine Active
+              </span>
+              <button
+                onClick={() => setIsSettingsOpen(true)}
+                className="hover:text-indigo-600 transition"
+              >
+                Settings / Gemini API
+              </button>
+            </div>
+          </div>
+        </footer>
+
+        {/* Interactive Hackathon Tour Modal */}
+        <HackathonTourModal
+          isOpen={isTourOpen}
+          onClose={() => setIsTourOpen(false)}
+          setActiveTab={setActiveTab}
+          onTriggerPreset={handleTriggerDemoPreset}
+        />
+
+        {/* Settings Modal */}
+        <SettingsModal
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+          addToast={addToast}
+        />
+
+        {/* Global Toast Notifications */}
+        <ToastContainer toasts={toasts} removeToast={removeToast} />
+      </div>
+    );
+  }
+
+  // Render Root
+  const rootElement = document.getElementById('root');
+  if (rootElement) {
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(React.createElement(App));
+  }
+})();
+
